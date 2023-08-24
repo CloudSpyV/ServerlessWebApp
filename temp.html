@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> AWS Serverless Web App</title>
+  </head>
+  <body>
+   <div id="user_profile"></div>
+     <p>Please Wait.....</p>
+   </div>
+   <div>
+     <button onclivk="getUser()"> Get User Info</button>
+   </div>
+  </body>
+
+
+  <script type="text/javascript">
+    async function getUser(){
+      //get the user info from API gateway
+      
+      const api_url='https://czwq9c8w5f.execute-api.us-east-1.amazonaws.com/prod/user_profile?user_email=hello@gmail.com';
+      const api_response= await fetch(api_url);
+      const api_data = await(api_response).json();
+      console.log(api_data);
+      
+      const div_user_info=document.getElementById('user_profile');
+      div_user_info.innerHTML=api_data['body']
+    }
+  </script>
+</html>
