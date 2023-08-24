@@ -1,9 +1,48 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title> AWS Serverless Web Application</title>
-    </head>
-    <body>
-Hello World!! 
-    </body>
+<head>
+    <title>AWS Serverless Web Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .navigation a {
+            margin: 0 10px;
+            text-decoration: none;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            border-radius: 5px;
+        }
+
+        .navigation a:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>AWS Serverless Web Application</h1>
+
+    <div class="navigation">
+        <a href="https://web-app-ntcc-2023.auth.us-east-1.amazoncognito.com/signup?client_id=ad9l2fpimvmj4k9shsirgosd7&response_type=code&scope=email+openid+phone&redirect_uri=https%3A%2F%2Fexample.com">Sign Up</a>
+        <a href="./sign-in.html">Sign In</a>
+        <a href="./sign-out.html">Sign Out</a>
+    </div>
+    
+    <!-- Rest of your content here -->
+
+</body>
 </html>
