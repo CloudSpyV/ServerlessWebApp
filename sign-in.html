@@ -1,97 +1,155 @@
 <!DOCTYPE html>
-
 <html lang="en">
-  <head>
-  <meta charset="utf-8">
+<head>
+    <meta charset="utf-8">
+    <title>Sign In</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(to bottom right, #232F3E, #314F69);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #fff;
+        }
 
-    <!-- Javascript SDKs-->
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        button {
+            margin-bottom: 10px;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #333;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        #logged-in,
+        #home {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #logged-in p,
+        #home p {
+            margin: 0;
+        }
+
+        a {
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .amazon-logo {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: url(amazon-logo.png) no-repeat center;
+            background-size: cover;
+            opacity: 0.7;
+        }
+    </style>
+    <!-- Javascript SDKs -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="js/amazon-cognito-auth.min.js"></script>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.596.0.min.js"></script>
     <script src="js/amazon-cognito-identity.min.js"></script>
     <script src="js/config.js"></script>
-  </head>
+</head>
 
-  <body>
+<body>
+    <h1>Please sign in</h1>
+
     <form>
-      <h1>Please sign in</h1>
-
-      <input type="text" id="inputUsername"  placeholder="Email address" name="username" required autofocus>
-      <input type="password" id="inputPassword"  placeholder="Password" name="password" required>
-      <button type="button" onclick="signInButton()">Sign in</button>
+        <input type="text" id="inputUsername" placeholder="Email address" name="username" required autofocus>
+        <input type="password" id="inputPassword" placeholder="Password" name="password" required>
+        <button type="button" onclick="signInButton()">Sign in</button>
     </form>
 
-    <br>
-    <div id='logged-in'>
-      <p></p>
+    <div id="logged-in">
+        <p></p>
     </div>
 
-    <p>
-      <a href="./profile.html">Profile</a>
-    </p>
-
-    <br>
-    <div id='home'>
-      <p>
-        <a href='./index.html'>Home</a>
-      </p>
+    <div id="home">
+        <p>
+            <a href="./index.html">Home</a>
+        </p>
     </div>
 
     <script>
-
-      var data = {
-        UserPoolId : _config.cognito.userPoolId,
-        ClientId : _config.cognito.clientId
-      };
-      var userPool = new AmazonCognitoIdentity.CognitoUserPool(data);
-      var cognitoUser = userPool.getCurrentUser();
-
-      function signInButton() {
-        // sign-in to AWS Cognito
-
-        var authenticationData = {
-          Username : document.getElementById("inputUsername").value,
-          Password : document.getElementById("inputPassword").value,
+        var data = {
+            UserPoolId: _config.cognito.userPoolId,
+            ClientId: _config.cognito.clientId
         };
+        var userPool = new AmazonCognitoIdentity.CognitoUserPool(data);
+        var cognitoUser = userPool.getCurrentUser();
 
-        var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+        function signInButton() {
+            var authenticationData = {
+                Username: document.getElementById("inputUsername").value,
+                Password: document.getElementById("inputPassword").value
+            };
 
-        var poolData = {
-          UserPoolId : _config.cognito.userPoolId, // Your user pool id here
-          ClientId : _config.cognito.clientId, // Your client id here
-        };
+            var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
 
-        var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+            var poolData = {
+                UserPoolId: _config.cognito.userPoolId,
+                ClientId: _config.cognito.clientId
+            };
 
-        var userData = {
-          Username : document.getElementById("inputUsername").value,
-          Pool : userPool,
-        };
+            var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
 
-        var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+            var userData = {
+                Username: document.getElementById("inputUsername").value,
+                Pool: userPool
+            };
 
-        cognitoUser.authenticateUser(authenticationDetails, {
-            onSuccess: function (result) {
-              var accessToken = result.getAccessToken().getJwtToken();
-              console.log(result);
+            var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
 
-              //get user info, to show that you are logged in
-              cognitoUser.getUserAttributes(function(err, result) {
-                  if (err) {
-                    console.log(err);
-                    return;
-                  }
-                  console.log(result);
-                  document.getElementById("logged-in").innerHTML = "You are logged in as: " + result[2].getValue();
-              });
+            cognitoUser.authenticateUser(authenticationDetails, {
+                onSuccess: function(result) {
+                    var accessToken = result.getAccessToken().getJwtToken();
+                    console.log(result);
 
-            },
-            onFailure: function(err) {
-              alert(err.message || JSON.stringify(err));
-            },
-        });
-      }
+                    cognitoUser.getUserAttributes(function(err, result) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        console.log(result);
+                        document.getElementById("logged-in").innerHTML = "You are logged in as: " + result[2].getValue();
+                    });
+                },
+                onFailure: function(err) {
+                    alert(err.message || JSON.stringify(err));
+                }
+            });
+        }
     </script>
-
-  </body>
+</body>
 </html>

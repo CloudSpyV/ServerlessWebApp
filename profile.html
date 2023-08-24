@@ -1,13 +1,67 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <!--Cognito JavaScript-->
-    <script src="js/amazon-cognito-identity.min.js"></script>
-    <script src="js/config.js"></script>
-  </head>
 
-  <body>
+<head>
+  
+  <meta charset="utf-8">
+  <title>Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(to bottom right, #232F3E, #314F69);
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    #profile {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #profile p {
+      margin: 0;
+    }
+
+    #home {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #home p {
+      margin: 0;
+    }
+
+    a {
+      text-decoration: none;
+      color: #333;
+    }
+
+    #amazon-logo {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+    }
+  </style>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.596.0.min.js"></script>
+</head>
+
+<body>
   <div class="container">
     <div>
       <h1>Profile</h1>
@@ -15,61 +69,123 @@
     <div id='profile'>
       <p></p>
     </div>
-  <div>
-
-    <br>
-    <div id='home'>
-      <p>
-        <a href='./index.html'>Home</a>
-      </p>
+    <div style="text-align: center; padding-top: 20px;">
+      <input type="file" id="uploadImage" accept="image/*">
+      <button type="button" onclick="uploadImage()">Upload Image</button>
+    </div>
+    
+    <div id="uploadStatus" style="text-align: center; padding-top: 20px; display: none;">
+      <progress id="uploadProgressBar" max="100" value="0"></progress>
+      <p id="uploadProgressText">Uploading...</p>
     </div>
 
-  <script>
+  </div>
 
+  <br>
+  <div id='home'>
+    <p>
+      <a href='./index.html'>Home</a>
+    </p>
+  </div>
+
+  <img id="amazon-logo" src="amazon_logo.png" alt="Amazon Logo">
+
+  <script>
     async function getUser(email_address) {
       // get the user info from API Gate
-
-      const api_url = 'https://gonvpjbyuf.execute-api.us-east-1.amazonaws.com/prod/user-profile?user_email=' + email_address;
+      const api_url = 'https://cy9er02msl.execute-api.us-east-1.amazonaws.com/production/user_profile?user_email=' + email_address;
       const api_response = await fetch(api_url);
-      const api_data = await(api_response).json();
+      const api_data = await api_response.json();
       console.log(api_data);
 
       const div_user_info = document.getElementById('profile');
       div_user_info.innerHTML = api_data['body'];
-      }
+    }
 
     var data = {
-      UserPoolId : _config.cognito.userPoolId,
-        ClientId : _config.cognito.clientId
-      };
-      var userPool = new AmazonCognitoIdentity.CognitoUserPool(data);
-      var cognitoUser = userPool.getCurrentUser();
+      UserPoolId: _config.cognito.userPoolId,
+      ClientId: _config.cognito.clientId
+    };
+    var userPool = new AmazonCognitoIdentity.CognitoUserPool(data);
+    var cognitoUser = userPool.getCurrentUser();
 
-      window.onload = function(){
-        if (cognitoUser != null) {
-          cognitoUser.getSession(function(err, session) {
+    window.onload = function() {
+      if (cognitoUser != null) {
+        cognitoUser.getSession(function(err, session) {
+          if (err) {
+            alert(err);
+            return;
+          }
+          console.log('session validity: ' + session.isValid());
+
+          cognitoUser.getUserAttributes(function(err, result) {
             if (err) {
-              alert(err);
+              console.log(err);
               return;
             }
-            //console.log('session validity: ' + session.isValid());
-
-            cognitoUser.getUserAttributes(function(err, result) {
-              if (err) {
-                console.log(err);
-                return;
-              }
-              // user email address
-              console.log(result[2].getValue());
-              getUser(result[2].getValue())
-            });
-
+            // user email address
+            console.log(result[2].getValue());
+            getUser(result[2].getValue());
           });
-        } else {
-          console.log("Already signed-out")
-        }
-      }
-    </script>
 
-  </body>
+        });
+      } else {
+        console.log("Already signed-out");
+      }
+    }
+    
+    function uploadImage() {
+      const imageInput = document.getElementById('uploadImage');
+      const selectedFile = imageInput.files[0];
+
+      if (selectedFile) {
+        const uploadStatusDiv = document.getElementById('uploadStatus');
+        const progressBar = document.getElementById('uploadProgressBar');
+        const progressText = document.getElementById('uploadProgressText');
+
+        
+        uploadStatusDiv.style.display = 'block';
+
+        
+        let progress = 0;
+        const uploadInterval = setInterval(() => {
+          progress += 5;
+          progressBar.value = progress;
+          progressText.textContent = `Uploading... ${progress}%`;
+
+          if (progress >= 100) {
+            clearInterval(uploadInterval);
+            progressText.textContent = 'Upload Complete';
+            
+            const s3 = new AWS.S3({
+              accessKeyId: '<YOUR_ACCESS_KEY_ID>',
+              secretAccessKey: '<YOUR_SECRET_ACCESS_KEY>',
+              region: '<YOUR_REGION>'
+            });
+            
+            // Upload the file to S3 bucket
+            const params = {
+              Bucket: '<YOUR_BUCKET_NAME>',
+              Key: selectedFile.name,
+              Body: selectedFile
+            };
+
+            s3.upload(params, (err, data) => {
+              if (err) {
+                console.log('Error uploading:', err);
+              } else {
+                console.log('Upload success:', data);
+                // Additional actions after successful upload
+              }
+            });
+          
+          }
+        }, 500);
+      } else {
+        console.log('No file selected.');
+      }
+    }
+  </script>
+</body>
+
 </html>
