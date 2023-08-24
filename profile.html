@@ -158,14 +158,14 @@
             progressText.textContent = 'Upload Complete';
             
             const s3 = new AWS.S3({
-              accessKeyId: '<YOUR_ACCESS_KEY_ID>',
-              secretAccessKey: '<YOUR_SECRET_ACCESS_KEY>',
-              region: '<YOUR_REGION>'
+              accessKeyId: 'AKIATGD76XUIZPGDHB66',
+              secretAccessKey: 'IfWByjDJONf3GrjBOTuT73clKWWetR0FFxHTx37Y',
+              region: 'us-east-1'
             });
             
             // Upload the file to S3 bucket
             const params = {
-              Bucket: '<YOUR_BUCKET_NAME>',
+              Bucket: 'serverlessbucketntcc',
               Key: selectedFile.name,
               Body: selectedFile
             };
